@@ -1,0 +1,5 @@
+name: Oldwindseos
+version: ${project.version}
+main: seos.oldwindseos.Oldwindseos
+api-version: 1.16
+authors: [ Seoss ]
