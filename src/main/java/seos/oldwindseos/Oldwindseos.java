@@ -108,6 +108,7 @@ public final class Oldwindseos extends JavaPlugin {
         manager.registerEvents(new Zord(), this);
         manager.registerEvents(new Summer(), this);
         manager.registerEvents(new Baphomet(), this);
+        manager.registerEvents(new Shit(), this);
         Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "Enabling Zord");
         addPlayer();
         runBlitz();

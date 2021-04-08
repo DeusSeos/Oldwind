@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Zord implements Listener {
 
@@ -67,32 +68,32 @@ public class Zord implements Listener {
 
     @EventHandler
     public void useZord(PlayerInteractEvent event) {
-        if (event.getHand().equals(EquipmentSlot.HAND)) {
-            Action eventAction = event.getAction();
-            Player player = event.getPlayer();
-            List<String> zordLore = new ArrayList<>();
-            zordLore.add("The previous wielder of this");
-            zordLore.add("This book keeps blinking!");
-            if(player.isOp() && utils.isFull(player) && utils.hasGodLore(player, zordLore) && (eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))){
-                player.playEffect(EntityEffect.TELEPORT_ENDER);
-                player.teleport(getLooking(player, 15));
-                teleportNotify(player);
-            } else if (utils.isFull(player) && utils.hasGodLore(player, zordLore) && (eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))) {
-                if (hasCharges(player) && utils.enoughLvl(player, (1f/3))) {
-                    Integer charges = main.zordCharges.get(player).get(1);
-                    main.zordCharges.get(player).set(1, charges-1);
-                    player.playEffect(EntityEffect.TELEPORT_ENDER);
-                    player.teleport(getLooking(player, 15), PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-                    utils.changeXP(player, (1f/3));
-                    teleportNotify(player);
+        Player player = event.getPlayer();
+        List<String> zordLore = new ArrayList<>();
+        zordLore.add("The previous wielder of this");
+        zordLore.add("This book keeps blinking!");
+        if (utils.isFull(player) && utils.hasGodLore(player, zordLore)) {
+            if (event.getHand().equals(EquipmentSlot.HAND)) {
+                Action eventAction = event.getAction();
+                if ((eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))){
+                    if (player.isOp()) {
+                        player.playEffect(EntityEffect.TELEPORT_ENDER);
+                        player.teleport(getLooking(player, 15));
+                        teleportNotify(player);
+                    } else {
+                        if (hasCharges(player) && utils.enoughLvl(player, (1f / 3))) {
+                            Integer charges = main.zordCharges.get(player).get(1);
+                            main.zordCharges.get(player).set(1, charges - 1);
+                            player.playEffect(EntityEffect.TELEPORT_ENDER);
+                            player.teleport(getLooking(player, 15), PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+                            utils.changeXP(player, (1f / 3));
+                            teleportNotify(player);
 
+                        }
+                    }
                 }
             }
-            return;
-
         }
-        return;
     }
-
 
 }
