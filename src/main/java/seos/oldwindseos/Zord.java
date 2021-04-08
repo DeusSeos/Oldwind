@@ -12,12 +12,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Zord implements Listener {
 
@@ -51,19 +49,15 @@ public class Zord implements Listener {
         player.playEffect(EntityEffect.TELEPORT_ENDER);
         Location location = player.getLocation();
         location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 2, 1);
-
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event){
+    public void onJoin(PlayerJoinEvent event) {
         Player eventPlayer = event.getPlayer();
         List<Integer> cooldownCharge = new ArrayList<>();
         cooldownCharge.add(0, 7);
         cooldownCharge.add(1, 3);
-        if (!main.zordCharges.containsKey(eventPlayer))
-            main.zordCharges.put(eventPlayer, cooldownCharge);
-        else
-            return;
+        main.zordCharges.putIfAbsent(eventPlayer, cooldownCharge);
     }
 
     @EventHandler
@@ -73,26 +67,25 @@ public class Zord implements Listener {
         zordLore.add("The previous wielder of this");
         zordLore.add("This book keeps blinking!");
         if (utils.isFull(player) && utils.hasGodLore(player, zordLore)) {
-            if (event.getHand().equals(EquipmentSlot.HAND)) {
-                Action eventAction = event.getAction();
-                if ((eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))){
-                    if (player.isOp()) {
+            Action eventAction = event.getAction();
+            if ((eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))) {
+                if (player.isOp()) {
+                    player.playEffect(EntityEffect.TELEPORT_ENDER);
+                    player.teleport(getLooking(player, 15));
+                    teleportNotify(player);
+                } else {
+                    if (hasCharges(player) && utils.enoughLvl(player, (1f / 3))) {
+                        Integer charges = main.zordCharges.get(player).get(1);
+                        main.zordCharges.get(player).set(1, charges - 1);
                         player.playEffect(EntityEffect.TELEPORT_ENDER);
-                        player.teleport(getLooking(player, 15));
+                        player.teleport(getLooking(player, 15), PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
+                        utils.changeXP(player, (1f / 3));
                         teleportNotify(player);
-                    } else {
-                        if (hasCharges(player) && utils.enoughLvl(player, (1f / 3))) {
-                            Integer charges = main.zordCharges.get(player).get(1);
-                            main.zordCharges.get(player).set(1, charges - 1);
-                            player.playEffect(EntityEffect.TELEPORT_ENDER);
-                            player.teleport(getLooking(player, 15), PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
-                            utils.changeXP(player, (1f / 3));
-                            teleportNotify(player);
 
-                        }
                     }
                 }
             }
+
         }
     }
 
