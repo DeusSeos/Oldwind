@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Utils {
@@ -21,11 +22,50 @@ public class Utils {
         return (offHand.getType() != Material.AIR && mainHand.getType() != Material.AIR);
     }
 
+    public boolean hasGodLore(Player player, List<String> lores, String slot) {
+        if (slot.toLowerCase(Locale.ROOT).contains("both")){
+            ItemStack mainHand = player.getInventory().getItemInMainHand();
+            ItemStack offHand = player.getInventory().getItemInOffHand();
+            List<String> sLores = new ArrayList<>();
+            sLores.add("");
+            try {
+                sLores.addAll(Objects.requireNonNull(mainHand.getItemMeta().getLore()));
+                sLores.addAll(Objects.requireNonNull(offHand.getItemMeta().getLore()));
+            } catch (NullPointerException exception){
+
+            }
+            return sLores.containsAll(lores);
+        } else if (slot.toLowerCase(Locale.ROOT).contains("main")){
+            ItemStack mainHand = player.getInventory().getItemInMainHand();
+            List<String> sLores = new ArrayList<>();
+            sLores.add("");
+            try {
+                sLores.addAll(Objects.requireNonNull(mainHand.getItemMeta().getLore()));
+            } catch (NullPointerException exception){
+
+            }
+            return sLores.containsAll(lores);
+        } else if (slot.toLowerCase(Locale.ROOT).contains("off")) {
+            ItemStack offHand = player.getInventory().getItemInOffHand();
+            List<String> sLores = new ArrayList<>();
+            sLores.add("");
+            try {
+                sLores.addAll(Objects.requireNonNull(offHand.getItemMeta().getLore()));
+            } catch (NullPointerException exception) {
+
+            }
+            return sLores.containsAll(lores);
+        }else
+            return false;
+    }
+
     /***
      *
      * @param player
      * @return if items have the lore required
      */
+
+
 
     @SuppressWarnings("deprecation")
     public boolean hasGodLore(Player player, List<String> lores) {

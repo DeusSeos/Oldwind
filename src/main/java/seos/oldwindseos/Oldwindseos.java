@@ -83,6 +83,7 @@ public final class Oldwindseos extends JavaPlugin {
                             float spread = 70f;
                             Arrow arrow1 = world.spawnArrow(location, vector, 0.6f, spread);
                             arrow1.setShooter(arrow.getShooter());
+                            arrow1.setDamage(11.5);
                         } else
 
                             return;
@@ -106,6 +107,7 @@ public final class Oldwindseos extends JavaPlugin {
         manager.registerEvents(new AntiVoid(), this);
         manager.registerEvents(new Zord(), this);
         manager.registerEvents(new Summer(), this);
+        manager.registerEvents(new Baphomet(), this);
         Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "Enabling Zord");
         addPlayer();
         runBlitz();
