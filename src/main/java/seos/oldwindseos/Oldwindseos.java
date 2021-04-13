@@ -36,7 +36,9 @@ public final class Oldwindseos extends JavaPlugin {
             UUID playerUUID = player.getUniqueId();
             if (!zordCharges.containsKey(playerUUID))
                 zordCharges.putIfAbsent(playerUUID, cooldownCharge);
-
+//            if (!zordCharges.containsKey(player)){
+//                zordCharges.putIfAbsent(player, cooldownCharge);
+//            }
             else
                 return;
         }
@@ -51,33 +53,33 @@ public final class Oldwindseos extends JavaPlugin {
 //            Bukkit.getConsoleSender().sendMessage("Zoop ZOop");
             if (!zordCharges.isEmpty()) {
                 for (UUID key : zordCharges.keySet()) {
+//                    Bukkit.getConsoleSender().sendMessage("Player: " + Bukkit.getServer().getPlayer(key).getName() + " Charges: " + zordCharges.get(key).get(1));
                     Integer ticks = zordCharges.get(key).get(0);
                     Integer charges = zordCharges.get(key).get(1);
-                    if (charges < 3) { // charges aren't full
+                    if (charges < 3 && ticks > 0) { // charges aren't full
                         zordCharges.get(key).set(0, ticks - 1);
-                        if (ticks <= 0) {
-                            zordCharges.get(key).set(0, 120);
-                            zordCharges.get(key).set(1, charges + 1);
-                            if(Bukkit.getServer().getPlayer(key) != null) {
-                                try{
-                                    Player player = Bukkit.getServer().getPlayer(key);
-                                    Bukkit.getConsoleSender().sendMessage("Player: " + player.getName() + " Charges: " + zordCharges.get(key).get(1));
-                                    Location location = player.getLocation();
-                                    location.getWorld().spawnParticle(Particle.PORTAL, location, 50);
-                                    location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_AMBIENT, 2, 1);
-                                } catch (NullPointerException exception){
-                                    Bukkit.getConsoleSender().sendMessage("Error in runZord(). Something went wrong during getPlayer");
-                                    Bukkit.getConsoleSender().sendMessage(exception.getMessage());
-                                }
 
-                            } else {
-                                String playerName = Bukkit.getServer().getOfflinePlayer(key).getName();
-                                Bukkit.getConsoleSender().sendMessage(playerName + " is probably offline.");
-                                Bukkit.getConsoleSender().sendMessage("Player: " + playerName + " Charges: " + zordCharges.get(key).get(1));
-                                return;
+                    } else if (charges < 3) {
+                        zordCharges.get(key).set(0, 120);
+                        zordCharges.get(key).set(1, charges + 1);
+                        if (Bukkit.getServer().getPlayer(key) != null) {
+                            try {
+                                Player player = Bukkit.getServer().getPlayer(key);
+                                Bukkit.getConsoleSender().sendMessage("Player: " + player.getName() + " Charges: " + zordCharges.get(key).get(1));
+                                Location location = player.getLocation();
+                                location.getWorld().spawnParticle(Particle.PORTAL, location, 50);
+                                location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_AMBIENT, 2, 1);
+                            } catch (NullPointerException exception) {
+                                Bukkit.getConsoleSender().sendMessage("Error in runZord(). Something went wrong during getPlayer");
+                                Bukkit.getConsoleSender().sendMessage(exception.getMessage());
                             }
-                        } else return;
-                    }else return;
+
+                        } else {
+                            String playerName = Bukkit.getServer().getOfflinePlayer(key).getName();
+                            Bukkit.getConsoleSender().sendMessage(playerName + " is probably offline.");
+                            Bukkit.getConsoleSender().sendMessage("Player: " + playerName + " Charges: " + zordCharges.get(key).get(1));
+                        }
+                    }
                 }
             }
         }, 0L, 1L);
@@ -124,7 +126,7 @@ public final class Oldwindseos extends JavaPlugin {
         manager.registerEvents(new AntiVoid(), this);
         manager.registerEvents(new Zord(), this);
         manager.registerEvents(new Summer(), this);
-        //manager.registerEvents(new Baphomet(), this);
+        manager.registerEvents(new Baphomet(), this);
         addPlayers();
         runBlitz();
         runZord();

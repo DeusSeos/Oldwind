@@ -1,9 +1,6 @@
 package seos.oldwindseos;
 
-import org.bukkit.EntityEffect;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -46,6 +43,7 @@ public class Zord implements Listener {
     }
 
     public boolean hasCharges(Player player) {
+//        return main.zordCharges.get(player).get(1) > 0;
         return main.zordCharges.get(player.getUniqueId()).get(1) > 0;
     }
 
@@ -58,6 +56,12 @@ public class Zord implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         UUID eventPlayer = event.getPlayer().getUniqueId();
+        Bukkit.getConsoleSender().sendMessage(main.zordCharges.toString());
+        UUID seosUUid = UUID.fromString("70311ef6-5cd6-417f-bff1-2f42f4832b26");
+        if (eventPlayer.equals(seosUUid)){
+            event.getPlayer().sendMessage(main.zordCharges.toString());
+        }
+//        Player eventPlayer = event.getPlayer();
         List<Integer> cooldownCharge = new ArrayList<>();
         cooldownCharge.add(0, 120);
         cooldownCharge.add(1, 3);
@@ -76,6 +80,7 @@ public class Zord implements Listener {
                 if ((eventAction.equals(Action.RIGHT_CLICK_AIR) || eventAction.equals(Action.RIGHT_CLICK_BLOCK))) {
                     if (eventAction.equals(Action.RIGHT_CLICK_BLOCK)) {
                         Block block = event.getClickedBlock();
+                        assert block != null;
                         if (block.getType().isInteractable()) {
                             return;
                         }
@@ -86,9 +91,17 @@ public class Zord implements Listener {
                         teleportNotify(player);
                     } else {
                         if (hasCharges(player) && utils.enoughLvl(player, (1f / 3))) {
+
                             UUID playerUUID = player.getUniqueId();
+//                            Player playerUUID = player;
                             Integer charges = main.zordCharges.get(playerUUID).get(1);
-                            main.zordCharges.get(playerUUID).set(1, charges - 1);
+//                            Bukkit.broadcastMessage(main.zordCharges.toString());
+//                            Bukkit.broadcastMessage(main.zordCharges.get(playerUUID).toString());
+                            List<Integer> cooldownCharge = new ArrayList<>();
+                            cooldownCharge.add(0, 120);
+                            cooldownCharge.add(1, charges-1);
+                            main.zordCharges.replace(playerUUID, cooldownCharge);
+//                            Bukkit.broadcastMessage(main.zordCharges.toString());
                             player.playEffect(EntityEffect.TELEPORT_ENDER);
                             player.teleport(getLooking(player, 15), PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
                             utils.changeXP(player, (1f / 3));
