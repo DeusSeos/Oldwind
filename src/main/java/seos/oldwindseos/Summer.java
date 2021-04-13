@@ -24,7 +24,8 @@ public class Summer implements Listener {
             falkLore.add("We require more arrows.");
             if (utils.hasGodLore((Player) event.getEntity(), falkLore)) {
                 Arrow arrow = (Arrow) event.getProjectile();
-                main.blitzArrows.putIfAbsent(arrow.getUniqueId(), (Player) arrow.getShooter());
+                arrow.setDamage(11.5);
+                main.blitzArrows.putIfAbsent(arrow.getUniqueId(), ((Player)arrow.getShooter()).getUniqueId());
             }
         } else
             return;

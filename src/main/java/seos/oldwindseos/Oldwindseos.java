@@ -24,17 +24,19 @@ public final class Oldwindseos extends JavaPlugin {
      * Elder Branch
      */
 
-    public HashMap<Player, List<Integer>> zordCharges = new HashMap<>();
+    public HashMap<UUID, List<Integer>> zordCharges = new HashMap<>();
 
-    public HashMap<UUID, Player> blitzArrows = new HashMap<>();
+    public HashMap<UUID, UUID> blitzArrows = new HashMap<>();
 
-    public void addPlayer() {
+    public void addPlayers() {
         List<Integer> cooldownCharge = new ArrayList<>();
-        cooldownCharge.add(0, 7);
+        cooldownCharge.add(0, 120);
         cooldownCharge.add(1, 3);
         for (Player player : getServer().getOnlinePlayers()) {
-            if (!zordCharges.containsKey(player))
-                zordCharges.put(player, cooldownCharge);
+            UUID playerUUID = player.getUniqueId();
+            if (!zordCharges.containsKey(playerUUID))
+                zordCharges.putIfAbsent(playerUUID, cooldownCharge);
+
             else
                 return;
         }
@@ -46,23 +48,39 @@ public final class Oldwindseos extends JavaPlugin {
     public void runZord() {
         BukkitScheduler scheduler = getServer().getScheduler();
         scheduler.scheduleSyncRepeatingTask(this, () -> {
+//            Bukkit.getConsoleSender().sendMessage("Zoop ZOop");
             if (!zordCharges.isEmpty()) {
-                for (Player key : zordCharges.keySet()) {
-                    Integer seconds = zordCharges.get(key).get(0);
+                for (UUID key : zordCharges.keySet()) {
+                    Integer ticks = zordCharges.get(key).get(0);
                     Integer charges = zordCharges.get(key).get(1);
                     if (charges < 3) { // charges aren't full
-                        zordCharges.get(key).set(0, seconds - 1);
-                        if (seconds <= 0) {
-                            zordCharges.get(key).set(0, 7);
+                        zordCharges.get(key).set(0, ticks - 1);
+                        if (ticks <= 0) {
+                            zordCharges.get(key).set(0, 120);
                             zordCharges.get(key).set(1, charges + 1);
-                            Location location = key.getLocation();
-                            location.getWorld().spawnParticle(Particle.PORTAL, location, 50);
-                            location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_AMBIENT, 2, 1);
+                            if(Bukkit.getServer().getPlayer(key) != null) {
+                                try{
+                                    Player player = Bukkit.getServer().getPlayer(key);
+                                    Bukkit.getConsoleSender().sendMessage("Player: " + player.getName() + " Charges: " + zordCharges.get(key).get(1));
+                                    Location location = player.getLocation();
+                                    location.getWorld().spawnParticle(Particle.PORTAL, location, 50);
+                                    location.getWorld().playSound(location, Sound.ENTITY_ENDERMAN_AMBIENT, 2, 1);
+                                } catch (NullPointerException exception){
+                                    Bukkit.getConsoleSender().sendMessage("Error in runZord(). Something went wrong during getPlayer");
+                                    Bukkit.getConsoleSender().sendMessage(exception.getMessage());
+                                }
+
+                            } else {
+                                String playerName = Bukkit.getServer().getOfflinePlayer(key).getName();
+                                Bukkit.getConsoleSender().sendMessage(playerName + " is probably offline.");
+                                Bukkit.getConsoleSender().sendMessage("Player: " + playerName + " Charges: " + zordCharges.get(key).get(1));
+                                return;
+                            }
                         } else return;
                     }else return;
                 }
             }
-        }, 0L, 20l);
+        }, 0L, 1L);
         // Plugin startup logic
     }
 
@@ -73,33 +91,32 @@ public final class Oldwindseos extends JavaPlugin {
                 for (UUID arrowID : blitzArrows.keySet()) {
                     Arrow arrow = (Arrow) Bukkit.getEntity(arrowID);
                     if (Bukkit.getEntity(arrowID) != null) {
-                        Player player = blitzArrows.get(arrowID);
-                        Inventory inventory = player.getInventory();
+                        UUID playerUUID = blitzArrows.get(arrowID);
+                        Inventory inventory = Bukkit.getPlayer(playerUUID).getInventory();
                         if (inventory.contains(Material.ARROW)) {
-                            inventory.removeItem(new ItemStack(Material.ARROW, 1));
+                            inventory.removeItem(new ItemStack(Material.ARROW, 4));
+                            assert arrow != null;
                             Location location = arrow.getLocation();
                             World world = location.getWorld();
                             Vector vector = arrow.getVelocity();
+                            double damage = arrow.getDamage();
                             float spread = 70f;
-                            Arrow arrow1 = world.spawnArrow(location, vector, 0.6f, spread);
-                            arrow1.setShooter(arrow.getShooter());
-                            arrow1.setDamage(11.5);
+                            for (int i = 0; i < 4; i++) {
+                                Arrow arrow1 = world.spawnArrow(location, vector, 0.6f, spread);
+                                arrow1.setShooter(arrow.getShooter());
+                                arrow1.setDamage(damage);
+                            }
                         } else
-
                             return;
-
                     } else {
                         blitzArrows.remove(arrowID);
                         return;
                     }
-
                 }
             } else return;
-        }, 0L, 1L);
+        }, 0L, 4L);
         // Plugin startup logic
-
     }
-
 
     @Override
     public void onEnable() {
@@ -107,13 +124,11 @@ public final class Oldwindseos extends JavaPlugin {
         manager.registerEvents(new AntiVoid(), this);
         manager.registerEvents(new Zord(), this);
         manager.registerEvents(new Summer(), this);
-        manager.registerEvents(new Baphomet(), this);
-        manager.registerEvents(new Shit(), this);
-        Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_AQUA + "Enabling Zord");
-        addPlayer();
+        //manager.registerEvents(new Baphomet(), this);
+        addPlayers();
         runBlitz();
         runZord();
-
+        Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Oldwind Seos enabled");
     }
 
     @Override
